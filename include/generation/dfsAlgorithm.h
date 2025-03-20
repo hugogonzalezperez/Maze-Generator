@@ -10,7 +10,6 @@ class DFSAlgorithm : public MazeGenerator {
 
   void generate(int startX, int startY) override {
     Cell* startCell = grid_->getCell(startX, startY);
-    startCell->setStart(true);
     startCell->setVisited(true);
     stack_.push(startCell);
 
@@ -33,6 +32,8 @@ class DFSAlgorithm : public MazeGenerator {
         }
       }
     }
+
+    grid_->CleanVisited();
   }
 
   void setRenderer(MazeRenderer* renderer) {
@@ -41,8 +42,8 @@ class DFSAlgorithm : public MazeGenerator {
 
  private:
   Grid* grid_;
-  std::stack<Cell*> stack_;
   std::mt19937 gen_;
+  std::stack<Cell*> stack_;
   MazeRenderer* renderer_;
 };
 

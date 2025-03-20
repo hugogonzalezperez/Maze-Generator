@@ -23,5 +23,8 @@
 #include "./renderer.h"
 #include "./generation/mazeGenerator.h"
 #include "./generation/dfsAlgorithm.h"
+#include "./generation/wilsonAlgorithm.h"
+#include "./solver/mazeSolver.h"
+#include "./solver/wallFollow.h"
 
 #endif  // UTILS_H

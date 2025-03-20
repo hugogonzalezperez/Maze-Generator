@@ -14,6 +14,9 @@ class Cell {
   void setVisited(bool visited) { visited_ = visited; }
   bool isVisited() const { return visited_; }
 
+  void setPath(bool isPath) { isPath_ = isPath; }
+  bool isPath() const { return isPath_; }
+
   void setStart(bool isStart) { isStart_ = isStart; }
   bool isStart() const { return isStart_; }
 
@@ -42,6 +45,7 @@ class Cell {
   bool visited_;
   bool isStart_;
   bool isEnd_;
+  bool isPath_;
 };
 
 #endif  // CELL_H

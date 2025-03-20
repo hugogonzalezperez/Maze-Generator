@@ -64,23 +64,23 @@ class MazeRenderer {
 
  private:
   void drawCell(Cell* cell) {
+    SDL_Rect rect = {cell->getX() * cellWidth_, cell->getY() * cellHeight_, cellWidth_, cellHeight_};
+
     if (cell->isVisited()) {
       SDL_SetRenderDrawColor(renderer_, 255, 136, 0, 255);
-      SDL_Rect rect = {cell->getX() * cellWidth_, cell->getY() * cellHeight_, cellWidth_, cellHeight_};
-      SDL_RenderFillRect(renderer_, &rect);
-    }
-    if(cell->isStart()) {
+    } else if (cell->isStart()) {
       SDL_SetRenderDrawColor(renderer_, 0, 255, 0, 255);
-      SDL_Rect rect = {cell->getX() * cellWidth_, cell->getY() * cellHeight_, cellWidth_, cellHeight_};
-      SDL_RenderFillRect(renderer_, &rect);
+    } else if (cell->isEnd()) {
+      SDL_SetRenderDrawColor(renderer_, 255, 0, 0, 255);
+    } else if (cell->isPath()) {
+      SDL_SetRenderDrawColor(renderer_, 0, 0, 255, 255);
+    } else {
+      return; // No need to draw if none of the conditions are met
     }
 
-    if(cell->isEnd()) {
-      SDL_SetRenderDrawColor(renderer_, 255, 0, 0, 255);
-      SDL_Rect rect = {cell->getX() * cellWidth_, cell->getY() * cellHeight_, cellWidth_, cellHeight_};
-      SDL_RenderFillRect(renderer_, &rect);
-    }
+    SDL_RenderFillRect(renderer_, &rect);
   }
+
   void drawWalls(Cell* cell) {
     SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
     int x = cell->getX() * cellWidth_;

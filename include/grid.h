@@ -8,7 +8,7 @@ class Grid {
   Grid(int cols, int rows)
       : cols_(cols), rows_(rows) {
     try {
-      grid_.reserve(cols_ * rows_);
+      grid_.reserve(cols_ * rows_ + cols_);
       for (int y = 0; y < rows_; ++y) {
         for (int x = 0; x < cols_; ++x) {
           grid_.push_back(new Cell(x, y));
@@ -29,6 +29,28 @@ class Grid {
       // Evita que el destructor propague excepciones
     }
   }
+
+  void setStart(int x, int y) {
+    if (!isValidIndex(x, y)) {
+      throw std::out_of_range("Error: Índices fuera de rango en setStart.");
+    }
+
+    start_ = getCell(x, y);
+    start_->setStart(true);
+  }
+
+  inline Cell* getStart() const { return start_; }
+
+  void setEnd(int x, int y) {
+    if (!isValidIndex(x, y)) {
+      throw std::out_of_range("Error: Índices fuera de rango en setEnd.");
+    }
+
+    end_ = getCell(x, y);
+    end_->setEnd(true);
+  }
+
+  inline Cell* getEnd() const { return end_; }
 
   inline int getWidth() const { return cols_; }
 
@@ -71,6 +93,18 @@ class Grid {
     } else if (dx == 0 && dy == -1) {  // Arriba
       cell1->removeWall(0);
       cell2->removeWall(2);
+    }
+  }
+
+  void CleanVisited() {
+    for (Cell* cell : grid_) {
+      cell->setVisited(false);
+    }
+  }
+
+  void SetPath(std::vector<Cell*> path) {
+    for (Cell* cell : path) {
+      cell->setPath(true);
     }
   }
 
@@ -130,6 +164,8 @@ class Grid {
 
   std::vector<Cell*> grid_;
   int cols_, rows_;
+  Cell* start_;
+  Cell* end_;
 };
 
 #endif  // GRID_H

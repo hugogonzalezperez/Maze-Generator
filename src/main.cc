@@ -3,6 +3,8 @@
 
 #include "../include/utils.h"
 
+// TODO: REVISAR LA IMPLEMENTACIÓN DE WILSON Y QUE SE PUEDA CERRAR LA VENTANA EN MITAD DE LA GENERACIÓN
+
 int main() {
   int cols = 10;
   int rows = 10;
@@ -14,12 +16,21 @@ int main() {
     return -1;
   }
 
+  auto start = std::chrono::high_resolution_clock::now();
+
   DFSAlgorithm dfs(&grid);
   dfs.setRenderer(&renderer);
 
-  int startX = 5, startY = 5;
-  grid.getCell(9, 9)->setEnd(true);
-  dfs.generate(startX, startY);
+  dfs.generate(0, 0);
+
+  WallFollow wallFollow(&grid);
+  wallFollow.setRenderer(&renderer);
+
+  wallFollow.solve(0, 0, cols - 1, rows - 1);
+
+  auto end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> elapsed = end - start;
+  std::cout << "Tiempo de ejecución: " << elapsed.count() << " segundos" << std::endl;
 
   bool running = true;
   SDL_Event event;
