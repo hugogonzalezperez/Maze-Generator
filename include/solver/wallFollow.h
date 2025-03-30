@@ -8,9 +8,9 @@ class WallFollow : public MazeSolver {
   WallFollow(Grid* grid) : grid_(grid) {}
 
   void solve(int startX, int startY, int endX, int endY) override {
-    Cell* current = grid_->getCell(startX, startY);
+    std::shared_ptr<Cell> current = grid_->getCell(startX, startY);
     current->setStart(true);
-    Cell* goal = grid_->getCell(endX, endY);
+    std::shared_ptr<Cell> goal = grid_->getCell(endX, endY);
     goal->setEnd(true);
 
     path_.push_back(current);
@@ -32,7 +32,7 @@ class WallFollow : public MazeSolver {
       int dx = (direction == 1) - (direction == 3);
       int dy = (direction == 2) - (direction == 0);
 
-      Cell* next = grid_->getCell(current->getX() + dx, current->getY() + dy);
+      std::shared_ptr<Cell> next = grid_->getCell(current->getX() + dx, current->getY() + dy);
 
       if (next && !current->hasWall(direction)) {
         current = next;
@@ -51,7 +51,7 @@ class WallFollow : public MazeSolver {
   }
 
  private:
-  Cell* move(Cell* cell, int dir) {
+  std::shared_ptr<Cell> move(std::shared_ptr<Cell> cell, int dir) {
     int x = cell->getX();
     int y = cell->getY();
     switch (dir) {
@@ -70,7 +70,7 @@ class WallFollow : public MazeSolver {
   Grid* grid_;
   std::mt19937 gen_;
   MazeRenderer* renderer_;
-  std::vector<Cell*> path_;
+  std::vector<std::shared_ptr<Cell>> path_;
 };
 
 #endif  // WALL_FOLLOW_H

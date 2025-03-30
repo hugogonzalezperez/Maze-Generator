@@ -9,9 +9,9 @@ class WilsonAlgorithm : public MazeGenerator {
       : grid_(grid), gen_(seed.value_or(std::random_device{}())) {}
 
   void generate(int startX, int startY) override {
-    std::vector<Cell*> unvisitedCells = grid_->getGrid();
+    std::vector<std::shared_ptr<Cell>> unvisitedCells = grid_->getGrid();
 
-    Cell* startCell = grid_->getCell(startX, startY);
+    std::shared_ptr<Cell> startCell = grid_->getCell(startX, startY);
     startCell->setStart(true);
     startCell->setVisited(true);
 
@@ -21,9 +21,9 @@ class WilsonAlgorithm : public MazeGenerator {
     // Caminatas aleatorias
     while (!unvisitedCells.empty()) {
       std::uniform_int_distribution<int> dist(0, unvisitedCells.size() - 1);
-      Cell* current = unvisitedCells[dist(gen_)];
-      std::vector<Cell*> path;
-      std::unordered_map<Cell*, Cell*> pathMap;
+      std::shared_ptr<Cell> current = unvisitedCells[dist(gen_)];
+      std::vector<std::shared_ptr<Cell>> path;
+      std::unordered_map<std::shared_ptr<Cell>, std::shared_ptr<Cell>> pathMap;
 
       // Se marca como parte del camino
       path.push_back(current);
@@ -31,7 +31,7 @@ class WilsonAlgorithm : public MazeGenerator {
 
       /* std::cout << path.size() << std::endl;
       std::cout << pathMap.size() << std::endl;
-      for (Cell* cell : path) {
+      for (std::shared_ptr<Cell> cell : path) {
         std::cout << *cell << std::endl;
       }
 
@@ -41,12 +41,12 @@ class WilsonAlgorithm : public MazeGenerator {
 
       while (!current->isVisited()) {
         // Averiguar los vecinos no visitados
-        std::vector<Cell*> neighbors = grid_->getUnvisitedNeighbors(current);
+        std::vector<std::shared_ptr<Cell>> neighbors = grid_->getUnvisitedNeighbors(current);
         if (neighbors.empty()) break; // Si no hay vecinos disponibles se sale del bucle
 
         // Elegir un vecino aleatorio
         std::shuffle(neighbors.begin(), neighbors.end(), gen_);
-        Cell* next = neighbors.front();
+        std::shared_ptr<Cell> next = neighbors.front();
 
         path.push_back(next);
         pathMap[next] = current;
@@ -58,7 +58,7 @@ class WilsonAlgorithm : public MazeGenerator {
           path.erase(it + 1, path.end());
         }
 
-        for(Cell* cell : path) { std::cout << cell << " "; }
+        for(std::shared_ptr<Cell> cell : path) { std::cout << cell << " "; }
         std::cout << std::endl;
       }
 
@@ -70,7 +70,7 @@ class WilsonAlgorithm : public MazeGenerator {
 
       path.back()->setVisited(true);
 
-      unvisitedCells.erase(std::remove_if(unvisitedCells.begin(), unvisitedCells.end(), [](Cell* cell) { return cell->isVisited(); }), unvisitedCells.end());
+      unvisitedCells.erase(std::remove_if(unvisitedCells.begin(), unvisitedCells.end(), [](std::shared_ptr<Cell> cell) { return cell->isVisited(); }), unvisitedCells.end());
 
       if (renderer_) {
         renderer_->update();

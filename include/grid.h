@@ -11,7 +11,7 @@ class Grid {
       grid_.reserve(cols_ * rows_ + cols_);
       for (int y = 0; y < rows_; ++y) {
         for (int x = 0; x < cols_; ++x) {
-          grid_.push_back(new Cell(x, y));
+          grid_.push_back(std::make_shared<Cell>(x, y));
         }
       }
     } catch (const std::bad_alloc& e) {
@@ -21,12 +21,29 @@ class Grid {
 
   ~Grid() {
     try {
-      for (Cell* cell : grid_) {
-        delete cell;
-      }
       grid_.clear();
     } catch (...) {
       // Evita que el destructor propague excepciones
+    }
+  }
+
+  void resize(int newCols, int newRows) {
+    if (newCols <= 0 || newRows <= 0) {
+      throw std::invalid_argument("Error: Las dimensiones deben ser mayores que 0.");
+    }
+
+    cols_ = newCols;
+    rows_ = newRows;
+
+    // Limpiar el grid actual
+    grid_.clear();
+
+    // Reconstruir el grid con las nuevas dimensiones
+    grid_.reserve(cols_ * rows_);
+    for (int y = 0; y < rows_; ++y) {
+      for (int x = 0; x < cols_; ++x) {
+        grid_.push_back(std::make_shared<Cell>(x, y));
+      }
     }
   }
 
@@ -39,7 +56,7 @@ class Grid {
     start_->setStart(true);
   }
 
-  inline Cell* getStart() const { return start_; }
+  inline std::shared_ptr<Cell> getStart() const { return start_; }
 
   void setEnd(int x, int y) {
     if (!isValidIndex(x, y)) {
@@ -50,15 +67,27 @@ class Grid {
     end_->setEnd(true);
   }
 
-  inline Cell* getEnd() const { return end_; }
+  inline std::shared_ptr<Cell> getEnd() const { return end_; }
+
+  void setAlgorithmUsed(std::string algorithmUsed) {
+    algorithmUsed_ = algorithmUsed;
+  }
+
+  inline std::string getAlgorithmUsed() const { return algorithmUsed_; }
+
+  void setSeed(int seed) {
+    seed_ = seed;
+  }
+
+  inline int getSeed() const { return seed_; }
 
   inline int getWidth() const { return cols_; }
 
   inline int getHeight() const { return rows_; }
 
-  inline const std::vector<Cell*>& getGrid() const { return grid_; }
+  inline const std::vector<std::shared_ptr<Cell>>& getGrid() const { return grid_; }
 
-  Cell* getCell(int x, int y) {
+  std::shared_ptr<Cell> getCell(int x, int y) {
     if (!isValidIndex(x, y)) {
       throw std::out_of_range("Error: Índices fuera de rango en getCell.");
     }
@@ -73,7 +102,7 @@ class Grid {
     removeWallBetween(getCell(x1, y1), getCell(x2, y2));
   }
 
-  void removeWallBetween(Cell* cell1, Cell* cell2) {
+  void removeWallBetween(std::shared_ptr<Cell> cell1, std::shared_ptr<Cell> cell2) {
     if (!cell1 || !cell2) {
       throw std::runtime_error("Error: Intento de acceder a celdas nulas en removeWallBetween.");
     }
@@ -97,19 +126,19 @@ class Grid {
   }
 
   void CleanVisited() {
-    for (Cell* cell : grid_) {
+    for (std::shared_ptr<Cell> cell : grid_) {
       cell->setVisited(false);
     }
   }
 
-  void SetPath(std::vector<Cell*> path) {
-    for (Cell* cell : path) {
+  void SetPath(std::vector<std::shared_ptr<Cell>> path) {
+    for (std::shared_ptr<Cell> cell : path) {
       cell->setPath(true);
     }
   }
 
-  Cell* AnyHasNoWalls() {
-    for (Cell* cell : grid_) {
+  std::shared_ptr<Cell> AnyHasNoWalls() {
+    for (std::shared_ptr<Cell> cell : grid_) {
       if (!cell->hasWall(0) && !cell->hasWall(1) && !cell->hasWall(2) && !cell->hasWall(3)) {
         return cell;
       }
@@ -118,12 +147,12 @@ class Grid {
     return nullptr;
   }
 
-  std::vector<Cell*> getUnvisitedNeighbors(Cell* cell) {
+  std::vector<std::shared_ptr<Cell>> getUnvisitedNeighbors(std::shared_ptr<Cell> cell) {
     if (!cell) {
       throw std::runtime_error("Error: Puntero nulo en getUnvisitedNeighbors.");
     }
 
-    std::vector<Cell*> neighbors;
+    std::vector<std::shared_ptr<Cell>> neighbors;
     int x = cell->getX();
     int y = cell->getY();
 
@@ -138,7 +167,7 @@ class Grid {
       int ny = y + dir.dy;
 
       if (isValidIndex(nx, ny)) {
-        Cell* neighbor = getCell(nx, ny);
+        std::shared_ptr<Cell> neighbor = getCell(nx, ny);
         if (!neighbor->isVisited()) {
           neighbors.push_back(neighbor);
         }
@@ -162,10 +191,12 @@ class Grid {
     return x >= 0 && x < cols_ && y >= 0 && y < rows_;
   }
 
-  std::vector<Cell*> grid_;
+  std::vector<std::shared_ptr<Cell>> grid_;
   int cols_, rows_;
-  Cell* start_;
-  Cell* end_;
+  std::shared_ptr<Cell> start_;
+  std::shared_ptr<Cell> end_;
+  std::string algorithmUsed_;
+  int seed_;
 };
 
 #endif  // GRID_H

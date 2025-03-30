@@ -1,49 +1,61 @@
 #include <chrono>
 #include <iostream>
+#include <optional>
 
 #include "../include/utils.h"
 
-// TODO: REVISAR LA IMPLEMENTACIÓN DE WILSON Y QUE SE PUEDA CERRAR LA VENTANA EN MITAD DE LA GENERACIÓN
+void generateMaze(Grid& grid, MazeRenderer& renderer, std::optional<unsigned int> seed, bool visualize) {
+  DFSAlgorithm dfs(&grid, seed);
+  dfs.setRenderer(visualize ? &renderer : nullptr);
+  auto start = std::chrono::high_resolution_clock::now();
+  dfs.generate(0, 0);
+  auto end = std::chrono::high_resolution_clock::now();
+  std::cout << "Tiempo de ejecución Generación: " << std::chrono::duration<double>(end - start).count() << " segundos" << std::endl;
+}
 
-int main() {
-  int cols = 10;
-  int rows = 10;
-  Grid grid(cols, rows);
-  MazeRenderer renderer(&grid, 800, 800);
+int main(int argc, char* argv[]) {
+  try {
+    auto options = parseArguments(argc, argv);
+    Grid grid(20, 20);
+    MazeRenderer renderer(&grid, 800, 800);
+    if (!renderer.init()) {
+      std::cerr << "Failed to initialize renderer" << std::endl;
+      return -1;
+    }
 
-  if (!renderer.init()) {
-    std::cerr << "Failed to initialize renderer" << std::endl;
+    FileManager fileManager(&grid);
+
+    if (options.loadFromFile) {
+      fileManager.setInputFile(options.inputFile);
+      fileManager.loadMaze();
+      std::cout << "Maze loaded from file: " << options.inputFile << std::endl;
+    } else {
+      generateMaze(grid, renderer, options.seed, options.visualize);
+    }
+
+    if (options.seed) {
+      grid.setSeed(options.seed.value());
+      std::cout << "Seed set to: " << options.seed.value() << std::endl;
+    }
+
+    if (options.saveToFile) {
+      fileManager.saveMaze();
+      std::cout << "Maze saved to file." << std::endl;
+    }
+
+    bool running = true;
+    SDL_Event event;
+    while (running) {
+      while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT) running = false;
+      }
+      renderer.update();
+    }
+    renderer.cleanup();
+
+  } catch (const std::exception& e) {
+    std::cerr << e.what() << std::endl;
     return -1;
   }
-
-  auto start = std::chrono::high_resolution_clock::now();
-
-  DFSAlgorithm dfs(&grid);
-  dfs.setRenderer(&renderer);
-
-  dfs.generate(0, 0);
-
-  WallFollow wallFollow(&grid);
-  wallFollow.setRenderer(&renderer);
-
-  wallFollow.solve(0, 0, cols - 1, rows - 1);
-
-  auto end = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> elapsed = end - start;
-  std::cout << "Tiempo de ejecución: " << elapsed.count() << " segundos" << std::endl;
-
-  bool running = true;
-  SDL_Event event;
-
-  while (running) {
-    while (SDL_PollEvent(&event)) {
-      if (event.type == SDL_QUIT) {
-        running = false;
-      }
-    }
-    renderer.update();
-  }
-
-  renderer.cleanup();
   return 0;
 }

@@ -14,10 +14,14 @@ int main() {
     }
   }
 
-  Cell* initial = sizes[0];
-  initial->setVisited(true);
-  
+
   std::cout << "Sizes: " << sizes.size() << std::endl;
+
+  std::cout << "Paredes: "  << sizes[0]->getWallNumber() << std::endl;
+
+  sizes[0]->removeWall(1);
+
+  std::cout << "Paredes: " << sizes[0]->getWallNumber() << std::endl;
 
   auto start = std::chrono::high_resolution_clock::now();
 
@@ -33,3 +37,30 @@ int main() {
 
   return 0;
 }
+
+/* #include <chrono>
+#include <fstream>
+#include <iostream>
+
+int main() {
+  std::ofstream file("output.txt");
+
+  auto startGenerate = std::chrono::high_resolution_clock::now();
+
+  std::cout << char(15) << std::endl;
+
+  for (int i = 0; i < 5000; ++i) {
+    for (int j = 0; j < 5000; ++j) {
+      file << j << " ";
+      }
+    file << std::endl;
+  }
+
+  auto endGenerate = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> elapsedGenerate = endGenerate - startGenerate;
+  std::cout << "Tiempo de ejecución Generacion: " << elapsedGenerate.count() << " segundos" << std::endl;
+
+  file.close();
+
+  return 0;
+} */

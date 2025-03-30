@@ -9,20 +9,23 @@ class DFSAlgorithm : public MazeGenerator {
       : grid_(grid), gen_(seed.value_or(std::random_device{}())) {}
 
   void generate(int startX, int startY) override {
-    Cell* startCell = grid_->getCell(startX, startY);
+    grid_->setAlgorithmUsed("DFS");
+    grid_->setSeed(gen_());
+
+    std::shared_ptr<Cell> startCell = grid_->getCell(startX, startY);
     startCell->setVisited(true);
     stack_.push(startCell);
 
     while(!stack_.empty()) {
-      Cell* currentCell = stack_.top();
+      std::shared_ptr<Cell> currentCell = stack_.top();
       stack_.pop();
 
-      std::vector<Cell*> neighbors = grid_->getUnvisitedNeighbors(currentCell);
+      std::vector<std::shared_ptr<Cell>> neighbors = grid_->getUnvisitedNeighbors(currentCell);
 
       if(!neighbors.empty()) {
         std::shuffle(neighbors.begin(), neighbors.end(), gen_);
         stack_.push(currentCell);
-        Cell* neighbor = neighbors.front();
+        std::shared_ptr<Cell> neighbor = neighbors.front();
         grid_->removeWallBetween(currentCell, neighbor);
         neighbor->setVisited(true);
         stack_.push(neighbor);
@@ -43,7 +46,7 @@ class DFSAlgorithm : public MazeGenerator {
  private:
   Grid* grid_;
   std::mt19937 gen_;
-  std::stack<Cell*> stack_;
+  std::stack<std::shared_ptr<Cell>> stack_;
   MazeRenderer* renderer_;
 };
 

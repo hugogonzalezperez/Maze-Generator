@@ -5,7 +5,7 @@
 
 class Cell {
  public:
-  Cell(int x, int y) : x_(x), y_(y), visited_(false), isStart_(false), isEnd_(false) {}
+  Cell(int x, int y) : x_(x), y_(y), visited_(false), isPath_(false), isStart_(false), isEnd_(false) {}
 
   // SETTERS AND GETTERS
   int getX() const { return x_; }
@@ -32,11 +32,17 @@ class Cell {
     }
   }
 
+  void setWalls(unsigned long num) { walls_ = std::bitset<4>(num); }
+
   friend std::ostream &operator<<(std::ostream &os, const Cell &cell) {
-    os << "Cell(" << cell.x_ << ", " << cell.y_ << ") " << "Visited: " << cell.visited_;
+    os << "Cell(" << cell.x_ << ", " << cell.y_ << ") " << "Visited: " << cell.visited_ << " Path: " << cell.isPath_;
     os << "\nCell walls (Top, Right, Bottom, Left): "
        << cell.walls_[0] << ", " << cell.walls_[1] << ", " << cell.walls_[2] << ", " << cell.walls_[3] << std::endl;
     return os;
+  }
+
+  inline unsigned long getWallNumber() {
+    return walls_.to_ulong();
   }
 
  private:
