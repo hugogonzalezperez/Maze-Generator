@@ -177,6 +177,28 @@ class Grid {
     return neighbors;
   }
 
+  bool hasWallBetween(std::shared_ptr<Cell> cell1, std::shared_ptr<Cell> cell2) {
+    if (!cell1 || !cell2) {
+      throw std::runtime_error("Error: Intento de acceder a celdas nulas en hasWallBetween.");
+    }
+
+    int dx = cell2->getX() - cell1->getX();
+    int dy = cell2->getY() - cell1->getY();
+
+    switch (dx * 10 + dy) {  // Combinar dx y dy en un solo número para el switch
+      case 10:               // Derecha
+        return cell1->hasWall(1) || cell2->hasWall(3);
+      case -10:  // Izquierda
+        return cell1->hasWall(3) || cell2->hasWall(1);
+      case 1:  // Abajo
+        return cell1->hasWall(2) || cell2->hasWall(0);
+      case -1:  // Arriba
+        return cell1->hasWall(0) || cell2->hasWall(2);
+      default:
+        return true;  // No son vecinos directos, hay pared.
+    }
+  }
+
   friend std::ostream& operator<<(std::ostream& os, const Grid& grid) {
     os << "Grid(" << grid.cols_ << ", " << grid.rows_ << ")";
     return os;

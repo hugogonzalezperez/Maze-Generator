@@ -12,6 +12,27 @@ class MazeRenderer {
 
   ~MazeRenderer() { cleanup(); }
 
+  Grid* getGrid() const { return grid_; }
+  int getWidth() const { return width_; }
+  int getHeight() const { return height_; }
+  int getCellHeight() const { return cellHeight_; }
+  int getCellWidth() const { return cellWidth_; }
+  SDL_Window* getWindow() const { return window_; }
+  SDL_Renderer* getRenderer() const { return renderer_; }
+
+  void setGrid(Grid* grid) { grid_ = grid; }
+  void setWidth(int width) { width_ = width; }
+  void setHeight(int height) { height_ = height; }
+  void setCellHeight(int height) { cellHeight_ = height; }
+  void setCellWidth(int width) { cellWidth_ = width; }
+  void setWindow(SDL_Window* window) { window_ = window; }
+  void setRenderer(SDL_Renderer* renderer) { renderer_ = renderer; }
+
+  void resizeCells(int height, int width) {
+    cellHeight_ = height / grid_->getHeight();
+    cellWidth_ = width / grid_->getWidth();
+  }
+
   bool init() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
       std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;

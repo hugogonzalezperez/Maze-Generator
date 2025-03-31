@@ -4,19 +4,10 @@
 
 #include "../include/utils.h"
 
-void generateMaze(Grid& grid, MazeRenderer& renderer, std::optional<unsigned int> seed, bool visualize) {
-  DFSAlgorithm dfs(&grid, seed);
-  dfs.setRenderer(visualize ? &renderer : nullptr);
-  auto start = std::chrono::high_resolution_clock::now();
-  dfs.generate(0, 0);
-  auto end = std::chrono::high_resolution_clock::now();
-  std::cout << "Tiempo de ejecución Generación: " << std::chrono::duration<double>(end - start).count() << " segundos" << std::endl;
-}
-
 int main(int argc, char* argv[]) {
   try {
     auto options = parseArguments(argc, argv);
-    Grid grid(20, 20);
+    Grid grid(100, 100);
     MazeRenderer renderer(&grid, 800, 800);
     if (!renderer.init()) {
       std::cerr << "Failed to initialize renderer" << std::endl;
@@ -25,10 +16,12 @@ int main(int argc, char* argv[]) {
 
     FileManager fileManager(&grid);
 
+    ////////// LOAD MAZE ////////////
+
     if (options.loadFromFile) {
       fileManager.setInputFile(options.inputFile);
       fileManager.loadMaze();
-      std::cout << "Maze loaded from file: " << options.inputFile << std::endl;
+      renderer.resizeCells(800, 800);
     } else {
       generateMaze(grid, renderer, options.seed, options.visualize);
     }
@@ -43,12 +36,30 @@ int main(int argc, char* argv[]) {
       std::cout << "Maze saved to file." << std::endl;
     }
 
+    //////////// SELECCIÓN DE INICIO Y FINAL ////////////
+
+    selectStartAndEnd(grid, renderer);
+
+    //////////// SOLVER ////////////
+    
+    AStarAlgorithm aStar(&grid);
+    aStar.setRenderer(options.visualize ? &renderer : nullptr);
+    auto start = std::chrono::high_resolution_clock::now();
+    aStar.solve();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "Tiempo de ejecución Solución: " << std::chrono::duration<double>(end - start).count() << " segundos" << std::endl;
+    std::cout << "Maze solved." << std::endl;
+
     bool running = true;
     SDL_Event event;
+
     while (running) {
       while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT) running = false;
+        if (event.type == SDL_QUIT) {
+          running = false;
+        }
       }
+
       renderer.update();
     }
     renderer.cleanup();

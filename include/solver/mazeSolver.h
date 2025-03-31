@@ -5,7 +5,7 @@
 
 class MazeSolver {
  public:
-  virtual void solve(int startX, int startY, int EndX, int EndY) = 0;  // Método virtual puro
+  virtual void solve() = 0;  // Método virtual puro
   virtual ~MazeSolver() = default;                 // Destructor virtual
 };
 

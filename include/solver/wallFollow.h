@@ -7,11 +7,9 @@ class WallFollow : public MazeSolver {
  public:
   WallFollow(Grid* grid) : grid_(grid) {}
 
-  void solve(int startX, int startY, int endX, int endY) override {
-    std::shared_ptr<Cell> current = grid_->getCell(startX, startY);
-    current->setStart(true);
-    std::shared_ptr<Cell> goal = grid_->getCell(endX, endY);
-    goal->setEnd(true);
+  void solve() override {
+    std::shared_ptr<Cell> current = grid_->getStart();
+    std::shared_ptr<Cell> goal = grid_->getEnd();
 
     path_.push_back(current);
 
